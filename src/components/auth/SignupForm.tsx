@@ -4,17 +4,19 @@ import { toast } from '@/components/ui/sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-const LoginForm = () => {
+const SignupForm = () => {
   const navigate = useNavigate();
-  const { login, error, clearError } = useAuth();
+  const { register, error, clearError } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'email') setEmail(value);
     if (name === 'password') setPassword(value);
+    if (name === 'name') setName(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,12 +24,11 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      await login(email, password);
-      toast.success("Logged in successfully!");
+      await register(name, email, password);
+      toast.success("Account created successfully!");
       navigate('/dashboard');
     } catch (err) {
-      // Error is already set in the auth context
-      toast.error(error || "Authentication failed. Please try again.");
+      toast.error(error || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -36,9 +37,9 @@ const LoginForm = () => {
   return (
     <div className="w-full max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold">Welcome back</h2>
+        <h2 className="text-2xl font-bold">Create your account</h2>
         <p className="text-gray-600 mt-1">
-          Sign in to access your account
+          Get started with MediCheck today
         </p>
       </div>
 
@@ -49,6 +50,23 @@ const LoginForm = () => {
       )}
 
       <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            required
+            value={name}
+            onChange={handleInputChange}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 input-animated"
+            placeholder="Enter your name"
+          />
+        </div>
+        
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
@@ -71,20 +89,17 @@ const LoginForm = () => {
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <Link to="/forgot-password" className="text-sm text-primary-600 hover:text-primary-700">
-              Forgot password?
-            </Link>
           </div>
           <input
             id="password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
             value={password}
             onChange={handleInputChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 input-animated"
-            placeholder="Enter your password"
+            placeholder="Create a password"
           />
         </div>
 
@@ -99,18 +114,18 @@ const LoginForm = () => {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Logging in...
+              Creating account...
             </div>
           ) : (
-            <>Log In</>
+            <>Sign Up</>
           )}
         </Button>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium">
-              Sign up
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
+              Log in
             </Link>
           </p>
         </div>
@@ -155,4 +170,4 @@ const LoginForm = () => {
   );
 };
 
-export default LoginForm;
+export default SignupForm;

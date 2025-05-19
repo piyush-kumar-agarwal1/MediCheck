@@ -1,11 +1,12 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import { useAuth } from '@/contexts/AuthContext';
+import UserButton from '@/components/auth/UserButton';
 const Navbar = () => {
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const toggleMobileMenu = () => {
@@ -29,18 +30,25 @@ const Navbar = () => {
           <Link to="/dashboard" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Dashboard</Link>
         </div>
         
-        <div className="hidden md:flex items-center space-x-4">
-          <Link to="/login">
-            <Button variant="outline" className="border-primary-500 text-primary-600 hover:bg-primary-50">
-              Log in
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button className="bg-primary-500 hover:bg-primary-600">
-              Sign up
-            </Button>
-          </Link>
-        </div>
+        {/* Conditional rendering based on auth state */}
+        {user ? (
+          <div className="flex items-center gap-4">
+            <UserButton />
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center space-x-4">
+            <Link to="/login">
+              <Button variant="outline" className="border-primary-500 text-primary-600 hover:bg-primary-50">
+                Log in
+              </Button>
+            </Link>
+            <Link to="/signup">
+              <Button className="bg-primary-500 hover:bg-primary-600">
+                Sign up
+              </Button>
+            </Link>
+          </div>
+        )}
         
         {/* Mobile menu button */}
         <button 
@@ -91,7 +99,7 @@ const Navbar = () => {
                 Log in
               </Button>
             </Link>
-            <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+            <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full bg-primary-500 hover:bg-primary-600">
                 Sign up
               </Button>
