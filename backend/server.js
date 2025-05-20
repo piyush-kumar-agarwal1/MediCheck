@@ -26,7 +26,9 @@ app.use(cors({
       'http://localhost:5173',  // Vite default
       'http://localhost:8081',  // Your current frontend port
       'http://127.0.0.1:8081',
+      'https://medi-check-psi.vercel.app', // Your production URL
       'http://localhost:3000'   // Add this if you might use React's default port
+
     ];
     
     // Allow requests with no origin (like mobile apps, curl, etc)
