@@ -28,6 +28,7 @@ const Navbar = () => {
           <Link to="/" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Home</Link>
           <Link to="/about" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">About</Link>
           <Link to="/dashboard" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Dashboard</Link>
+          <Link to="/my-reports" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">My Reports</Link>
         </div>
         
         {/* Conditional rendering based on auth state */}
@@ -91,6 +92,13 @@ const Navbar = () => {
             onClick={() => setMobileMenuOpen(false)}
           >
             Dashboard
+          </Link>
+          <Link 
+            to="/my-reports" 
+            className="px-4 py-2 rounded-md hover:bg-gray-100 text-gray-800"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            My Reports
           </Link>
           <hr className="border-gray-200" />
           <div className="flex flex-col space-y-3 px-4">

@@ -3,7 +3,8 @@ const {
     getUserReports,
     getReport,
     uploadReport,
-    getDashboardStats
+    getDashboardStats,
+    submitManualReport  // Make sure this is imported correctly
 } = require('../controllers/reportController');
 const { authenticateToken } = require('../middleware/auth');
 const { validateReport } = require('../middleware/validator');
@@ -24,13 +25,21 @@ router.get('/', getUserReports);
 router.get('/stats', getDashboardStats);
 
 // @route   GET /api/reports/:id
-// @desc    Get a single report
+// @desc    Get report by ID
 // @access  Private
 router.get('/:id', getReport);
 
+// Add this route to your report.js routes file
+router.get('/:id/download', getReport);
+
 // @route   POST /api/reports
-// @desc    Upload a new report
+// @desc    Upload file report
 // @access  Private
-router.post('/', validateReport, uploadReport);
+router.post('/', uploadReport);
+
+// @route   POST /api/reports/manual
+// @desc    Submit manual report data
+// @access  Private
+router.post('/manual', submitManualReport);  // Make sure this route exists!
 
 module.exports = router;

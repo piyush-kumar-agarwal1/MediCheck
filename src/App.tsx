@@ -13,6 +13,7 @@ import ReportResults from "./pages/ReportResults";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/Signup";
+import MyReports from "./pages/MyReports"; // Add this import
 
 const queryClient = new QueryClient();
 
@@ -27,14 +28,15 @@ const App = () => (
             {/* Public Routes */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/about" element={<About />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
             
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/my-reports" element={<MyReports />} /> {/* Now this should work */}
               <Route path="/report-upload" element={<ReportUpload />} />
-              <Route path="/report-results" element={<ReportResults />} />
+              <Route path="/report/:id" element={<ReportResults />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />

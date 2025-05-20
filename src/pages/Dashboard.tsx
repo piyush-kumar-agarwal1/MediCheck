@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/ui/navigation/Navbar';
 import Footer from '@/components/ui/navigation/Footer';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card'; // Add this import
 import StatCard from '@/components/dashboard/StatCard';
 import RecentReports from '@/components/dashboard/RecentReports';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/sonner';
+import { getDashboardStats, DashboardStats, DashboardError } from '@/services/dashboardService';
+
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -16,7 +20,34 @@ const Dashboard = () => {
     return "Good Evening";
   });
   
+  const [dashboardData, setDashboardData] = useState<DashboardStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<DashboardError | null>(null);
+  
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getDashboardStats();
+        setDashboardData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err as DashboardError);
+        toast({
+          title: "Error",
+          description: (err as DashboardError).message || "Failed to load dashboard data",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, []);
   
   return (
     <div className="min-h-screen">
@@ -31,46 +62,55 @@ const Dashboard = () => {
             <p className="text-gray-600">Welcome to your health dashboard. Here's your latest health overview.</p>
           </div>
           
-          <h2>Welcome, {user?.name || 'User'}!</h2>
-          
           <div className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard 
-                title="Total Reports" 
-                value="8" 
-                change="+2" 
-                isPositive={true} 
-                icon="📄"
-                colorClass="from-blue-500 to-blue-600" 
-              />
-              <StatCard 
-                title="Health Score" 
-                value="87/100" 
-                change="+5" 
-                isPositive={true} 
-                icon="❤️"
-                colorClass="from-green-500 to-green-600" 
-              />
-              <StatCard 
-                title="Risk Factors" 
-                value="2" 
-                change="-1" 
-                isPositive={true} 
-                icon="⚠️"
-                colorClass="from-yellow-500 to-yellow-600" 
-              />
-              <StatCard 
-                title="Next Checkup" 
-                value="15 days" 
-                icon="📅"
-                colorClass="from-purple-500 to-purple-600" 
-              />
+              {isLoading ? (
+                <>
+                  <CardSkeleton />
+                  <CardSkeleton />
+                  <CardSkeleton />
+                  <CardSkeleton />
+                </>
+              ) : (
+                <>
+                  <StatCard 
+                    title="Total Reports" 
+                    value={dashboardData?.totalReports || 0} 
+                    change="+2" 
+                    isPositive={true} 
+                    icon="📄"
+                    colorClass="from-blue-500 to-blue-600" 
+                  />
+                  <StatCard 
+                    title="Health Score" 
+                    value={`${dashboardData?.healthScore || 0}/100`} 
+                    change="+5" 
+                    isPositive={true} 
+                    icon="❤️"
+                    colorClass="from-green-500 to-green-600" 
+                  />
+                  <StatCard 
+                    title="Risk Factors" 
+                    value={dashboardData?.riskFactors || 0} 
+                    change="-1" 
+                    isPositive={true} 
+                    icon="⚠️"
+                    colorClass="from-yellow-500 to-yellow-600" 
+                  />
+                  <StatCard 
+                    title="Next Checkup" 
+                    value={`${dashboardData?.nextCheckup || 0} days`} 
+                    icon="📅"
+                    colorClass="from-purple-500 to-purple-600" 
+                  />
+                </>
+              )}
             </div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <RecentReports />
+              <RecentReports isLoading={isLoading} />
             </div>
             
             <div>
@@ -86,54 +126,58 @@ const Dashboard = () => {
                     </svg>
                     Upload New Report
                   </Button>
-                  
-                  <Button variant="outline" className="w-full text-gray-700 border-gray-200 justify-start">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Schedule Checkup
-                  </Button>
-                  
-                  <Button variant="outline" className="w-full text-gray-700 border-gray-200 justify-start">
+                  <Button 
+                    className="w-full bg-blue-500 hover:bg-blue-600 justify-start"
+                    onClick={() => navigate('/my-reports')}
+                  >
                     <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    View Health History
+                    View All Reports
                   </Button>
+                  
+                  {/* Rest of the buttons remain the same */}
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h3 className="font-semibold text-lg">Health Reminders</h3>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-lg">Health Document Repository</h3>
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate('/my-reports')}
+                    className="text-primary-600 border-primary-300"
+                  >
+                    View All
+                  </Button>
                 </div>
                 
-                <div className="divide-y divide-gray-100">
-                  <div className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium text-gray-800">Annual Physical</p>
-                      <span className="text-sm text-orange-600 font-medium">2 weeks</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Schedule with Dr. Smith</p>
-                  </div>
+                <p className="text-gray-600 mb-4">
+                  Store and access all your medical records securely in one place. Upload lab reports, imaging results, prescriptions, and more.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <Card className="text-center p-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate('/report-upload')}>
+                    <div className="text-3xl mb-2">🔬</div>
+                    <h4 className="font-medium">Lab Results</h4>
+                    <p className="text-sm text-gray-500">Blood work, urine tests</p>
+                  </Card>
                   
-                  <div className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium text-gray-800">Blood Work</p>
-                      <span className="text-sm text-green-600 font-medium">Completed</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Results available</p>
-                  </div>
+                  <Card className="text-center p-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate('/report-upload')}>
+                    <div className="text-3xl mb-2">🩻</div>
+                    <h4 className="font-medium">Imaging</h4>
+                    <p className="text-sm text-gray-500">X-rays, MRIs, CT scans</p>
+                  </Card>
                   
-                  <div className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between mb-1">
-                      <p className="font-medium text-gray-800">Dental Checkup</p>
-                      <span className="text-sm text-red-600 font-medium">Overdue</span>
-                    </div>
-                    <p className="text-sm text-gray-600">Last visit: 8 months ago</p>
-                  </div>
+                  <Card className="text-center p-4 hover:bg-gray-50 cursor-pointer" onClick={() => navigate('/report-upload')}>
+                    <div className="text-3xl mb-2">👨‍⚕️</div>
+                    <h4 className="font-medium">Physical Exam</h4>
+                    <p className="text-sm text-gray-500">Annual Check-ups, Doctor Visits</p>
+                  </Card>
                 </div>
               </div>
+              
+              {/* Health Reminders section remains the same */}
             </div>
           </div>
         </div>
@@ -143,5 +187,19 @@ const Dashboard = () => {
     </div>
   );
 };
+
+// Skeleton component for loading state
+const CardSkeleton = () => (
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
+    <div className="flex justify-between items-start">
+      <div className="w-full">
+        <div className="h-4 bg-gray-200 rounded w-1/4 mb-3"></div>
+        <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
+        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+      </div>
+      <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+    </div>
+  </div>
+);
 
 export default Dashboard;

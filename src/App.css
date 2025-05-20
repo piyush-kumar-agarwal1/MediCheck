@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+/* Add to your global CSS or module CSS */
+.help-sidebar {
+  position: sticky;
+  top: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+@media (max-width: 1024px) {
+  .help-sidebar {
+    position: static;
+    max-height: none;
+  }
+}

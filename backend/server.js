@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorHandler');
 const config = require('./config/config');
+const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -17,10 +18,29 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(cors({
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',  // Vite default
+      'http://localhost:8081',  // Your current frontend port
+      'http://127.0.0.1:8081',
+      'http://localhost:3000'   // Add this if you might use React's default port
+    ];
+    
+    // Allow requests with no origin (like mobile apps, curl, etc)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("Blocked by CORS: ", origin);
+      callback(null, false);
+    }
+  },
+  credentials: true
+}));
 app.use(morgan('dev')); // Request logging
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define Routes
 app.use('/api/auth', authRoutes);

@@ -32,20 +32,31 @@ exports.validateLogin = (req, res, next) => {
     next();
 };
 
-// Report validation
+// Adjust validateReport to handle file uploads properly
 exports.validateReport = (req, res, next) => {
-    const { title, type, fileUrl } = req.body;
-
-    if (!title || !type || !fileUrl) {
-        return res.status(400).json({ message: 'Please provide all required fields' });
-    }
-
-    const validTypes = ['blood_work', 'physical_exam', 'imaging', 'dental', 'other'];
-    if (!validTypes.includes(type)) {
-        return res.status(400).json({ message: 'Invalid report type' });
-    }
-
-    next();
+  // Skip validation for multipart form data (file uploads)
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next();
+  }
+  
+  // Regular validation for JSON requests
+  const { title, type } = req.body;
+  
+  if (!title) {
+    return res.status(400).json({ message: 'Title is required' });
+  }
+  
+  if (!type) {
+    return res.status(400).json({ message: 'Report type is required' });
+  }
+  
+  // Check if type is valid
+  const validTypes = ['blood_work', 'physical_exam', 'imaging', 'vaccination', 'other'];
+  if (!validTypes.includes(type)) {
+    return res.status(400).json({ message: 'Invalid report type' });
+  }
+  
+  next();
 };
 
 // Update profile validation
