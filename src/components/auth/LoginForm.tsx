@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -26,10 +26,18 @@ const LoginForm = () => {
     
     try {
       await login(email, password);
-      toast.success("Logged in successfully!");
+      toast({
+        title: "Success",
+        description: "Logged in successfully!",
+        variant: "default",
+      });
       navigate('/home');
     } catch (err) {
-      toast.error(error || "Authentication failed. Please try again.");
+      toast({
+        title: "Error", 
+        description: error || "Authentication failed. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

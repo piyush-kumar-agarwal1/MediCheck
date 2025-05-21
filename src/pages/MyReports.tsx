@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getUserReports } from '@/services/reportService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { ReportCardSkeleton } from '@/components/ui/skeletons/ReportSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
 

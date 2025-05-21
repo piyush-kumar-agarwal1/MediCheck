@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card'; // Add this import
 import StatCard from '@/components/dashboard/StatCard';
 import RecentReports from '@/components/dashboard/RecentReports';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { getDashboardStats, DashboardStats, DashboardError } from '@/services/dashboardService';
 
 

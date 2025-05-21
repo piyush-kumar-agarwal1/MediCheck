@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -38,17 +38,24 @@ const SignupForm = () => {
     }
     if (name === 'name') setName(value);
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
       await register(name, email, password);
-      toast.success("Account created successfully!");
+      toast({
+        title: "Success",
+        description: "Account created successfully!",
+        variant: "default",
+      });
       navigate('/home');
     } catch (err) {
-      toast.error(error || "Registration failed. Please try again.");
+      toast({
+        title: "Error",
+        description: error || "Registration failed. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

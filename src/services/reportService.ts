@@ -2,9 +2,8 @@ import axios from '@/lib/axios';
 import { API_BASE_URL, getApiUrl } from '@/config/api';
 
 // Upload a report file
-export const uploadReport = async (formData: FormData) => {
-  try {
-    console.log('Uploading to:', `${API_BASE_URL}/reports`);
+export const uploadReport = async (formData: FormData) => {  try {
+    console.log('Uploading to:', `${API_BASE_URL}/api/reports`);
     
     // For development/demo, simulate a successful response
     // Comment this for production
@@ -19,7 +18,7 @@ export const uploadReport = async (formData: FormData) => {
     // });
     
     // Use this for production
-    const response = await axios.post('/reports', formData, {
+    const response = await axios.post('/api/reports', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -33,10 +32,10 @@ export const uploadReport = async (formData: FormData) => {
 };
 
 // Update the manual report submission function
-export const uploadManualReport = async (reportData: any) => {
+export const uploadManualReport = async (reportData: Record<string, unknown>) => {
   try {
     // Use this for production
-    const response = await axios.post('/reports/manual', reportData);
+    const response = await axios.post('/api/reports/manual', reportData);
     return response.data;
     
     /* If you need a demo mode, uncomment this:
@@ -61,7 +60,7 @@ export const getReportById = async (id: string) => {
   try {
     console.log(`Fetching report with ID ${id}`);
     
-    const response = await axios.get(`/reports/${id}`);
+    const response = await axios.get(`/api/reports/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching report:', error);
@@ -72,7 +71,7 @@ export const getReportById = async (id: string) => {
 // Add this function to get user reports
 export const getUserReports = async () => {
   try {
-    const response = await axios.get('/reports');
+    const response = await axios.get('/api/reports');
     return response.data;
   } catch (error) {
     console.error('Error fetching user reports:', error);
@@ -87,7 +86,7 @@ export const getReport = async (reportId: string) => {
     // or use the real API endpoint
     
     // Use this for production
-    const response = await axios.get(`/reports/${reportId}`);
+    const response = await axios.get(`/api/reports/${reportId}`);
     return response.data;
     
     /* If you need a demo mode, uncomment this:

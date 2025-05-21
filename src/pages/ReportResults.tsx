@@ -5,7 +5,7 @@ import Footer from '@/components/ui/navigation/Footer';
 import ResultsPanel from '@/components/reports/ResultsPanel';
 import { Button } from '@/components/ui/button';
 import { getReportById } from '@/services/reportService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

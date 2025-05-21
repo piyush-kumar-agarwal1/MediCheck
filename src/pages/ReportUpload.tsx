@@ -55,12 +55,12 @@ const ReportUpload = () => {
   // Add activeStep state to track current step
   const [activeStep, setActiveStep] = useState('info');
   
-  // Define form progress steps
-  const formSteps = [
+  // Define form progress steps as state to allow updates
+  const [formSteps, setFormSteps] = useState([
     { id: 'info', label: 'Basic Info', isComplete: Boolean(reportName && reportType) },
     { id: 'upload', label: 'Upload', isComplete: Boolean(selectedFile) },
     { id: 'confirm', label: 'Confirm', isComplete: false },
-  ];
+  ]);
 
   // Handle tab changes and reset relevant form state
   const handleTabChange = (tab: string) => {
@@ -179,7 +179,7 @@ const ReportUpload = () => {
   });
 
   // For manual entry - MOVED HERE after all state variables are defined
-  const manualFormSteps = [
+  const [manualFormSteps, setManualFormSteps] = useState([
     { id: 'info', label: 'Basic Info', isComplete: Boolean(manualReportName && manualReportType) },
     { id: 'details', label: 'Report Details', isComplete: Boolean(manualReportType && 
       (manualReportType === 'blood_work' ? Object.values(bloodWorkData).some(v => v) : 
@@ -188,7 +188,7 @@ const ReportUpload = () => {
       manualReportType === 'vaccination' ? Object.values(vaccinationData).some(v => v) : false)
     )},
     { id: 'confirm', label: 'Review', isComplete: false },
-  ];
+  ]);
 
   // Form validation for file upload
   const fileForm = useForm({
