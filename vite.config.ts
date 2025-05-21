@@ -19,4 +19,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Handle SPA routing for production builds
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  },
 }));

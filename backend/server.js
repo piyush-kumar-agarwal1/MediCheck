@@ -24,9 +24,11 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       'http://localhost:5173',
+      'http://localhost:8080',
       'http://localhost:8081',
       'http://127.0.0.1:8081',
       'https://medi-check-psi.vercel.app',
+      'https://medicheck-ui.vercel.app',
       'http://localhost:3000'
     ];
 
@@ -47,6 +49,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
+
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  const publicPath = path.resolve(__dirname, '../dist');
+  app.use(express.static(publicPath));
+
+  // Serve index.html for any request that doesn't match an API route
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(publicPath, 'index.html'));
+  });
+}
 
 // Error handling middleware (should be last)
 app.use(errorHandler);
