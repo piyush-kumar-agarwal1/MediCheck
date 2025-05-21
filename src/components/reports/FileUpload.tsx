@@ -1,12 +1,11 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { uploadReport } from '@/services/reportService';
 
-const FileUpload = () => {
+const FileUpload = ({ onFileSelect, selectedFile, reportName, reportType }) => {
   const [isDragActive, setIsDragActive] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,17 +43,26 @@ const FileUpload = () => {
     // Check file type
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/tiff'];
     if (!allowedTypes.includes(uploadedFile.type)) {
-      toast.error("Invalid file type. Please upload a PDF or image.");
+      toast({
+        title: "Invalid file type",
+        description: "Please upload a PDF or image (JPG, PNG, TIFF).",
+        variant: "destructive"
+      });
       return;
     }
     
     // Check file size (max 10MB)
     if (uploadedFile.size > 10 * 1024 * 1024) {
-      toast.error("File too large. Maximum size is 10MB.");
+      toast({
+        title: "File too large",
+        description: "Maximum file size is 10MB.",
+        variant: "destructive"
+      });
       return;
     }
     
-    setFile(uploadedFile);
+    // Pass file to parent component
+    onFileSelect(uploadedFile);
   };
 
   const openFileDialog = () => {
@@ -64,44 +72,73 @@ const FileUpload = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!selectedFile || !reportName || !reportType) {
+      toast({
+        title: "Missing information",
+        description: "Please provide a report name, type and select a file.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate file upload with progress
-    const totalTime = 3000;
-    const interval = 100;
-    const steps = totalTime / interval;
-    let currentStep = 0;
-
-    const progressInterval = setInterval(() => {
-      currentStep++;
-      const progress = Math.round((currentStep / steps) * 100);
-      setUploadProgress(progress);
+    try {
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('title', reportName);
+      formData.append('type', reportType);
       
-      if (currentStep >= steps) {
-        clearInterval(progressInterval);
-        setIsUploading(false);
-        
-        // Simulate a delay before navigation to show completion
-        setTimeout(() => {
-          toast.success("Report uploaded successfully! Analyzing...");
-          navigate('/report-results');
-        }, 500);
-      }
-    }, interval);
+      // For progress tracking
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 5;
+        });
+      }, 200);
+      
+      // Perform the actual upload
+      console.log("Starting upload with:", { file: selectedFile, name: reportName, type: reportType });
+      const result = await uploadReport(formData);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      toast({
+        title: "Upload successful",
+        description: "Your report is being analyzed."
+      });
+      
+      // Navigate to the report results page
+      setTimeout(() => {
+        navigate(`/report/${result.reportId}`);
+      }, 1000);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const clearFile = () => {
-    setFile(null);
+    onFileSelect(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full">
       <div 
         className={`w-full p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${
           isDragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 bg-gray-50'
@@ -118,7 +155,7 @@ const FileUpload = () => {
           className="hidden"
         />
         
-        {!file ? (
+        {!selectedFile ? (
           <div className="text-center">
             <div className="mx-auto w-16 h-16 mb-4 text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,6 +170,7 @@ const FileUpload = () => {
             <Button 
               onClick={openFileDialog}
               className="bg-primary-500 hover:bg-primary-600"
+              type="button"
             >
               Select File
             </Button>
@@ -146,10 +184,11 @@ const FileUpload = () => {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-                <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{selectedFile.name}</p>
+                <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
               </div>
               <button 
+                type="button"
                 className="ml-4 text-gray-400 hover:text-gray-500 focus:outline-none"
                 onClick={clearFile}
               >
@@ -158,60 +197,21 @@ const FileUpload = () => {
                 </svg>
               </button>
             </div>
-            
-            {isUploading ? (
-              <div className="space-y-2">
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-primary-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-                <p className="text-sm text-gray-500 text-center">Uploading... {uploadProgress}%</p>
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <Button 
-                  onClick={handleUpload}
-                  className="bg-primary-500 hover:bg-primary-600"
-                >
-                  Upload and Analyze Report
-                </Button>
-              </div>
-            )}
           </div>
         )}
       </div>
       
-      <div className="mt-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">What happens after upload?</h3>
-        <ul className="space-y-3">
-          <li className="flex items-start">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 mt-0.5">
-              1
-            </div>
-            <p className="text-gray-600">Our AI analyzes your medical report and extracts key information</p>
-          </li>
-          <li className="flex items-start">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 mt-0.5">
-              2
-            </div>
-            <p className="text-gray-600">Results are presented in easy-to-understand visual formats</p>
-          </li>
-          <li className="flex items-start">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 mt-0.5">
-              3
-            </div>
-            <p className="text-gray-600">You'll receive personalized insights and recommendations</p>
-          </li>
-          <li className="flex items-start">
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center mr-3 mt-0.5">
-              4
-            </div>
-            <p className="text-gray-600">All data is securely stored and accessible only to you</p>
-          </li>
-        </ul>
-      </div>
+      {isUploading && (
+        <div className="mt-4 space-y-2">
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div 
+              className="bg-primary-600 h-2.5 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
+          <p className="text-sm text-gray-500 text-center">Uploading... {uploadProgress}%</p>
+        </div>
+      )}
     </div>
   );
 };

@@ -29,10 +29,10 @@ axios.interceptors.response.use(
   (error) => {
     // Handle common errors here
     if (error.response?.status === 401) {
-      // Handle unauthorized access - could redirect to login
+      // Handle unauthorized access - redirect to login
       console.error('Unauthorized access. Please log in again.');
-      // Consider adding this functionality to redirect to login
-      // window.location.href = '/login';
+      localStorage.removeItem('token'); // Clear invalid token
+      window.location.href = '/login'; // Redirect to login
     }
     return Promise.reject(error);
   }

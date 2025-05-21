@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { getReportById } from '@/services/reportService';
 import { toast } from '@/components/ui/sonner';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 const ReportResults = () => {
   const { id } = useParams();
   const [reportData, setReportData] = useState(null);

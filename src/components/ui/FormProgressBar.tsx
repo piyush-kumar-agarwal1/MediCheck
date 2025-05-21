@@ -51,37 +51,46 @@ const FormProgressBar = ({ steps, currentStepId }: FormProgressBarProps) => {
             className="flex flex-col justify-center text-center text-white bg-blue-600 shadow-none whitespace-nowrap transition-all duration-500"
           ></div>
         </div>
-        <div className="flex justify-between">
-          {steps.map((step, index) => (
-            <div 
-              key={step.id} 
-              className={`flex flex-col items-center ${index < steps.length - 1 ? 'w-full' : ''}`}
-            >
+        <div className="flex relative">
+          {/* Line connecting all steps - placed first so it's behind the circles */}
+          <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-300" aria-hidden="true"></div>
+          
+          {/* Colored progress line */}
+          <div 
+            className="absolute top-4 left-0 h-0.5 bg-blue-500 transition-all duration-500" 
+            style={{ 
+              width: `${progress}%`,
+              maxWidth: '100%'
+            }} 
+            aria-hidden="true"
+          ></div>
+          
+          {/* Step indicators */}
+          <div className="flex justify-between w-full relative z-10">
+            {steps.map((step, index) => (
               <div 
-                className={`rounded-full h-8 w-8 flex items-center justify-center z-10 ${
-                  step.isComplete ? 'bg-green-500 text-white' : 
-                  currentStepId === step.id ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
-                }`}
+                key={step.id} 
+                className="flex flex-col items-center"
               >
-                {step.isComplete ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </div>
-              <div className="text-xs mt-1 text-center">{step.label}</div>
-              {index < steps.length - 1 && (
                 <div 
-                  className={`h-0.5 w-full mt-4 ${
-                    steps[index].isComplete && steps[index + 1].isComplete ? 'bg-green-500' :
-                    steps[index].isComplete ? 'bg-blue-500' : 'bg-gray-300'
-                  }`} 
-                />
-              )}
-            </div>
-          ))}
+                  className={`rounded-full h-8 w-8 flex items-center justify-center ${
+                    step.isComplete ? 'bg-green-500 text-white' : 
+                    currentStepId === step.id ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
+                  }`}
+                  title={`Step ${index + 1}: ${step.label}`}
+                >
+                  {step.isComplete ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <span aria-hidden="true">{index + 1}</span>
+                  )}
+                </div>
+                <div className="text-xs mt-2 text-center">{step.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -22,6 +22,8 @@ import InfoTooltip from '@/components/ui/tooltip/InfoTooltip';
 import FormProgressBar from '@/components/ui/FormProgressBar';
 import ContextualHelp from '@/components/ui/ContextualHelp';
 import FadeTransition from '@/components/ui/animations/FadeTransition';
+import FileUpload from '@/components/reports/FileUpload';
+
 const fileUploadSchema = z.object({
   reportName: z.string().min(3, "Report name must be at least 3 characters"),
   reportType: z.string().min(1, "Please select a report type"),
@@ -36,17 +38,99 @@ const manualEntrySchema = z.object({
 const ReportUpload = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('file');
+  
+  // File upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [reportName, setReportName] = useState('');
   const [reportType, setReportType] = useState('');
-  const [manualReportType, setManualReportType] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [submittingManual, setSubmittingManual] = useState(false);
   
-  // Manual entry form state
+  // Manual entry state
+  const [submittingManual, setSubmittingManual] = useState(false);
   const [manualReportName, setManualReportName] = useState('');
+  const [manualReportType, setManualReportType] = useState('');
   const [manualReportDate, setManualReportDate] = useState('');
+  
+  // Add activeStep state to track current step
+  const [activeStep, setActiveStep] = useState('info');
+  
+  // Define form progress steps
+  const formSteps = [
+    { id: 'info', label: 'Basic Info', isComplete: Boolean(reportName && reportType) },
+    { id: 'upload', label: 'Upload', isComplete: Boolean(selectedFile) },
+    { id: 'confirm', label: 'Confirm', isComplete: false },
+  ];
+
+  // Handle tab changes and reset relevant form state
+  const handleTabChange = (tab: string) => {
+    // Completely reset all form state when switching tabs
+    if (tab !== activeTab) {
+      // Reset progress and loading states
+      setUploadProgress(0);
+      setUploading(false);
+      setSubmittingManual(false);
+      
+      // Reset file upload form
+      if (activeTab === 'file' && tab === 'manual') {
+        fileForm.reset();
+        setReportName('');
+        setReportType('');
+        setSelectedFile(null);
+        setActiveStep('info');
+      }
+      
+      // Reset manual entry form
+      if (activeTab === 'manual' && tab === 'file') {
+        manualForm.reset();
+        setManualReportName('');
+        setManualReportType('');
+        setManualReportDate('');
+        setBloodWorkData({
+          hemoglobin: '',
+          wbc: '',
+          rbc: '',
+          platelets: '',
+          glucose: '',
+          totalCholesterol: '',
+          hdl: '',
+          ldl: '',
+          triglycerides: '',
+          notes: ''
+        });
+        setPhysicalExamData({
+          systolicBP: '',
+          diastolicBP: '',
+          heartRate: '',
+          weight: '',
+          height: '',
+          bmi: '',
+          temperature: '',
+          oxygenSaturation: '',
+          notes: ''
+        });
+        setImagingData({
+          imagingType: '',
+          bodyRegion: '',
+          findings: '',
+          recommendations: ''
+        });
+        setVaccinationData({
+          vaccineName: '',
+          manufacturer: '',
+          lotNumber: '',
+          administrationDate: '',
+          nextDoseDate: '',
+          administeredBy: '',
+          notes: ''
+        });
+        setActiveStep('info');
+      }
+      
+      // Finally, set the active tab
+      setActiveTab(tab);
+    }
+  };
   
   // Blood work specific state
   const [bloodWorkData, setBloodWorkData] = useState({
@@ -94,6 +178,18 @@ const ReportUpload = () => {
     notes: ''
   });
 
+  // For manual entry - MOVED HERE after all state variables are defined
+  const manualFormSteps = [
+    { id: 'info', label: 'Basic Info', isComplete: Boolean(manualReportName && manualReportType) },
+    { id: 'details', label: 'Report Details', isComplete: Boolean(manualReportType && 
+      (manualReportType === 'blood_work' ? Object.values(bloodWorkData).some(v => v) : 
+      manualReportType === 'physical_exam' ? Object.values(physicalExamData).some(v => v) :
+      manualReportType === 'imaging' ? Object.values(imagingData).some(v => v) :
+      manualReportType === 'vaccination' ? Object.values(vaccinationData).some(v => v) : false)
+    )},
+    { id: 'confirm', label: 'Review', isComplete: false },
+  ];
+
   // Form validation for file upload
   const fileForm = useForm({
     resolver: zodResolver(fileUploadSchema),
@@ -130,17 +226,6 @@ const ReportUpload = () => {
       return `${fieldName} must be less than ${max}`;
     }
     return true;
-  };
-
-  // Handler for file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      if (!reportName) {
-        setReportName(file.name.split('.')[0]); // Set name from filename by default
-      }
-    }
   };
 
   // Handle file upload
@@ -202,6 +287,12 @@ const ReportUpload = () => {
     } finally {
       setUploading(false);
     }
+  };
+
+  // Handle file selection from FileUpload component
+  const handleFileSelected = (file) => {
+    setSelectedFile(file);
+    // Don't auto-advance to next step
   };
 
   // Handle manual data submission
@@ -556,6 +647,7 @@ const ReportUpload = () => {
           </div>
         );
       
+      // ... rest of your renderManualFields code ...
       case 'imaging':
         return (
           <div className="space-y-4 pt-4">
@@ -692,28 +784,6 @@ const ReportUpload = () => {
     }
   };
 
-  // Add activeStep state to track current step
-  const [activeStep, setActiveStep] = useState('info');
-
-  // Define form progress steps
-  const formSteps = [
-    { id: 'info', label: 'Basic Info', isComplete: Boolean(reportName && reportType) },
-    { id: 'upload', label: 'Upload', isComplete: Boolean(selectedFile) },
-    { id: 'confirm', label: 'Confirm', isComplete: false },
-  ];
-
-  // For manual entry
-  const manualFormSteps = [
-    { id: 'info', label: 'Basic Info', isComplete: Boolean(manualReportName && manualReportType) },
-    { id: 'details', label: 'Report Details', isComplete: Boolean(manualReportType && 
-      (manualReportType === 'blood_work' ? Object.values(bloodWorkData).some(v => v) : 
-       manualReportType === 'physical_exam' ? Object.values(physicalExamData).some(v => v) :
-       manualReportType === 'imaging' ? Object.values(imagingData).some(v => v) :
-       manualReportType === 'vaccination' ? Object.values(vaccinationData).some(v => v) : false)
-    )},
-    { id: 'confirm', label: 'Review', isComplete: false },
-  ];
-
   // Add contextual help items
   const helpItems = [
     {
@@ -754,19 +824,32 @@ const ReportUpload = () => {
     }
   ];
 
-  // Update useEffect to handle step changes
+  // Remove the problematic useEffect that auto-advances steps and replace with this one
+  // that only updates completion status
   useEffect(() => {
-    // Update activeStep based on form progress
+    // Only update the completion status of steps, don't automatically change steps
     if (activeTab === 'file') {
-      if (!reportName && !reportType) {
-        setActiveStep('info');
-      } else if (!selectedFile) {
-        setActiveStep('upload');
-      } else {
-        setActiveStep('confirm');
-      }
+      // Update form steps completion status but don't change the active step
+      setFormSteps([
+        { id: 'info', label: 'Basic Info', isComplete: Boolean(reportName && reportType) },
+        { id: 'upload', label: 'Upload', isComplete: Boolean(selectedFile) },
+        { id: 'confirm', label: 'Confirm', isComplete: false },
+      ]);
+    } else if (activeTab === 'manual') {
+      // Update manual form steps completion status but don't change the active step
+      setManualFormSteps([
+        { id: 'info', label: 'Basic Info', isComplete: Boolean(manualReportName && manualReportType) },
+        { id: 'details', label: 'Report Details', isComplete: Boolean(manualReportType && 
+          (manualReportType === 'blood_work' ? Object.values(bloodWorkData).some(v => v) : 
+          manualReportType === 'physical_exam' ? Object.values(physicalExamData).some(v => v) :
+          manualReportType === 'imaging' ? Object.values(imagingData).some(v => v) :
+          manualReportType === 'vaccination' ? Object.values(vaccinationData).some(v => v) : false)
+        )},
+        { id: 'confirm', label: 'Review', isComplete: false },
+      ]);
     }
-  }, [reportName, reportType, selectedFile, activeTab]);
+  }, [reportName, reportType, selectedFile, activeTab, manualReportName, manualReportType, 
+    bloodWorkData, physicalExamData, imagingData, vaccinationData]);
 
   return (
     <div className="min-h-screen">
@@ -802,7 +885,7 @@ const ReportUpload = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
               <Tabs
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={handleTabChange}
                 className="space-y-6"
               >
                 <TabsList className="grid w-full grid-cols-2">
@@ -872,7 +955,7 @@ const ReportUpload = () => {
                             <div className="flex justify-end">
                               <Button
                                 type="button"
-                                onClick={() => setActiveStep('upload')}
+                                onClick={() => reportName && reportType ? setActiveStep('upload') : null}
                                 disabled={!reportName || !reportType}
                               >
                                 Next
@@ -885,32 +968,12 @@ const ReportUpload = () => {
                       {activeStep === 'upload' && (
                         <FadeTransition show={true}>
                           <div className="space-y-6">
-                            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                              <Input
-                                type="file"
-                                id="file"
-                                className="hidden"
-                                onChange={handleFileChange}
-                                accept=".pdf,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="file" className="cursor-pointer">
-                                <div className="flex flex-col items-center justify-center space-y-2">
-                                  <div className="rounded-full bg-primary-50 p-3">
-                                    <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <p className="text-base font-medium text-gray-800">
-                                      {selectedFile ? selectedFile.name : 'Click to upload or drag and drop'}
-                                    </p>
-                                    <p className="text-sm text-gray-500">
-                                      PDF, JPG or PNG (max. 10MB)
-                                    </p>
-                                  </div>
-                                </div>
-                              </label>
-                            </div>
+                            <FileUpload 
+                              onFileSelect={handleFileSelected} 
+                              selectedFile={selectedFile}
+                              reportName={reportName}
+                              reportType={reportType}
+                            />
                             
                             <div className="flex justify-between">
                               <Button
@@ -922,7 +985,7 @@ const ReportUpload = () => {
                               </Button>
                               <Button
                                 type="button"
-                                onClick={() => setActiveStep('confirm')}
+                                onClick={() => selectedFile ? setActiveStep('confirm') : null}
                                 disabled={!selectedFile}
                               >
                                 Next
@@ -1092,7 +1155,7 @@ const ReportUpload = () => {
                             <div className="flex justify-end">
                               <Button
                                 type="button"
-                                onClick={() => setActiveStep('details')}
+                                onClick={() => manualReportName && manualReportType ? setActiveStep('details') : null}
                                 disabled={!manualReportName || !manualReportType}
                               >
                                 Next
@@ -1189,17 +1252,15 @@ const ReportUpload = () => {
               </Tabs>
             </div>
             
-              <div className="lg:col-span-1">
-              <div>
-                <ContextualHelp
-                    formState={activeTab === 'file' ? 
-                      { reportType, reportName, file: selectedFile } : 
-                      { manualReportType, manualReportName, biomarkers: bloodWorkData }
-                    }
-                    formErrors={formErrors}
-                    helpItems={helpItems}
-                  />
-              </div>
+            <div>
+              <ContextualHelp
+                formState={activeTab === 'file' ? 
+                  { reportType, reportName, file: selectedFile } : 
+                  { manualReportType, manualReportName, biomarkers: bloodWorkData }
+                }
+                formErrors={formErrors}
+                helpItems={helpItems}
+              />
             </div>
           </div>
         </div>

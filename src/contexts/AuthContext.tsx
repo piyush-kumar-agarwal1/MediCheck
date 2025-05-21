@@ -12,13 +12,18 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Add this function to handle token storage
+const storeAuthToken = (token: string) => {
+  localStorage.setItem('token', token);
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -90,28 +95,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Login user
   const login = async (email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      setError(null);
+      setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
       });
-
-      const data = await response.json();
-
+      
       if (!response.ok) {
-        throw new Error(data.message || 'Authentication failed');
+        const data = await response.json();
+        throw new Error(data.message || 'Login failed');
       }
-
-      localStorage.setItem('token', data.token);
+      
+      const data = await response.json();
       setUser(data.user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      
+      // Store the token for API requests
+      if (data.token) {
+        storeAuthToken(data.token);
+      }
+      
+      return data;
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
       throw err;
     } finally {
       setLoading(false);
