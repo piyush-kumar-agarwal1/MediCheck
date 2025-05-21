@@ -44,7 +44,7 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full max-w-md mx-auto">
       <div className="text-center mb-8">
         <div className="flex justify-center mb-3">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary-500 to-teal-500 flex items-center justify-center">

@@ -8,9 +8,9 @@ const Login = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
       <Navbar />
-      <main className="flex-grow flex items-center justify-center py-12 md:py-20 px-4">
+      <main className="flex-grow flex items-center justify-center py-6 md:py-20 px-4">
         <div className="w-full max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 items-center">
             <motion.div 
               className="hidden lg:block"
               initial={{ opacity: 0, x: -20 }}

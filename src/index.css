@@ -87,12 +87,20 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     scroll-behavior: smooth;
+    min-width: 320px;
+    -webkit-text-size-adjust: 100%;
   }
 
   /* Custom scrollbar */

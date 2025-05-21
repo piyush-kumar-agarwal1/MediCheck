@@ -29,7 +29,6 @@ const UserButton = () => {
       .toUpperCase()
       .substring(0, 2);
   };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +40,7 @@ const UserButton = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 z-[100]">
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             <p className="font-medium">{user?.name || 'User'}</p>

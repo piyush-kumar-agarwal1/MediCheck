@@ -63,7 +63,7 @@ const Dashboard = () => {
           </div>
           
           <div className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {isLoading ? (
                 <>
                   <CardSkeleton />
@@ -108,13 +108,13 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <div className="lg:col-span-2">
               <RecentReports isLoading={isLoading} />
             </div>
             
             <div>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 card-hover">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 mb-6 card-hover">
                 <h3 className="font-semibold text-lg mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <Button 
