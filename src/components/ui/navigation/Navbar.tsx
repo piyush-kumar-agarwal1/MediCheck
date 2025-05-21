@@ -25,10 +25,10 @@ const Navbar = () => {
         
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link to="/" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Home</Link>
-          <Link to="/about" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">About</Link>
+          <Link to="/home" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Home</Link>
           <Link to="/dashboard" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">Dashboard</Link>
           <Link to="/my-reports" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">My Reports</Link>
+          <Link to="/about" className="font-medium animated-underline pb-1 hover:text-primary-600 transition-colors">About</Link>
         </div>
         
         {/* Conditional rendering based on auth state */}

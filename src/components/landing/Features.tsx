@@ -1,79 +1,97 @@
-
+import { forwardRef } from 'react';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { 
+  LineChart, 
+  ShieldCheck, 
+  Smartphone, 
+  MessageSquare, 
+  FileText, 
+  Bell 
+} from 'lucide-react';
 
 const features = [
   {
-    icon: "📊",
+    icon: <LineChart className="h-6 w-6" />,
     title: "Visual Report Analysis",
-    description: "Transform complex medical data into easy-to-understand visual representations that highlight key health indicators.",
+    description: "Interactive visual breakdowns that make complex medical data easy to understand at a glance.",
     color: "bg-blue-50 text-blue-600",
   },
   {
-    icon: "🔍",
-    title: "Deep Health Insights",
-    description: "Our AI analyzes patterns across all your health reports to identify trends and potential concerns that might otherwise be missed.",
+    icon: <FileText className="h-6 w-6" />,
+    title: "Works with Any Report",
+    description: "Compatible with lab reports, imaging reports, and even manual entry for flexibility.",
     color: "bg-teal-50 text-teal-600",
   },
   {
-    icon: "📱",
-    title: "Accessible Anywhere",
-    description: "Access your health insights from any device, anytime. Your health data is always at your fingertips.",
+    icon: <MessageSquare className="h-6 w-6" />,
+    title: "AI Health Assistant",
+    description: "Ask questions about your reports and get clear, medically accurate answers in simple language.",
     color: "bg-purple-50 text-purple-600",
   },
   {
-    icon: "🔒",
+    icon: <ShieldCheck className="h-6 w-6" />,
     title: "Bank-Level Security",
-    description: "Your health data is encrypted with the highest security standards, ensuring your information remains private and protected.",
+    description: "Your health data is encrypted with the highest security standards to keep your information private.",
     color: "bg-orange-50 text-orange-600",
   },
   {
-    icon: "📈",
-    title: "Progress Tracking",
-    description: "Monitor your health progress over time with automated tracking of key metrics and personalized improvement suggestions.",
+    icon: <LineChart className="h-6 w-6" />,
+    title: "Trend Monitoring",
+    description: "Track your health metrics over time with automated monitoring and personalized insights.",
     color: "bg-green-50 text-green-600",
   },
   {
-    icon: "🔔",
-    title: "Smart Alerts",
-    description: "Receive timely notifications about important changes in your health metrics that may require attention.",
-    color: "bg-red-50 text-red-600",
+    icon: <Smartphone className="h-6 w-6" />,
+    title: "Access Anywhere",
+    description: "Check your health reports and insights from any device, no technical expertise required.",
+    color: "bg-indigo-50 text-indigo-600",
   },
 ];
 
-const Features = () => {
+const Features = forwardRef((props, ref) => {
   return (
-    <section className="py-20 bg-white">
+    <motion.section 
+      ref={ref}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="py-20 bg-white"
+    >
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gradient">Powerful Features</span> for Better Health Management
+            <span className="text-gradient">Powerful Features</span> for Better Health Understanding
           </h2>
           <p className="text-lg text-gray-600">
-            Our AI-powered platform helps you understand and manage your health reports with ease.
+            Everything you need to take control of your health data and make informed decisions.
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div 
+            <motion.div 
               key={index}
-              className={cn(
-                "p-6 rounded-xl card-hover",
-                index % 2 === 0 ? "animate-fade-in" : "animate-slide-in-up"
-              )}
-              style={{animationDelay: `${index * 0.1}s`}}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              className="p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300"
             >
-              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-xl mb-4", feature.color)}>
+              <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-4", feature.color)}>
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
               <p className="text-gray-600">{feature.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
-};
+});
+
+Features.displayName = 'Features';
 
 export default Features;
